@@ -1,11 +1,32 @@
 import { usersStore } from '@/stores/users'
 import { dayjs, createListResource } from 'frappe-ui'
-import { sameArrayContents } from '@/utils'
 import { computed, ref } from 'vue'
 import { allTimeSlots } from '@/components/Calendar/utils'
 
 export const showEventModal = ref(false)
 export const activeEvent = ref(null)
+
+function sameArrayContents(a, b) {
+  if (a === b) return true
+  if (!Array.isArray(a) || !Array.isArray(b)) return false
+  if (a.length !== b.length) return false
+  if (a.length === 0) return true
+
+  const counts = new Map()
+  for (const value of a) {
+    counts.set(value, (counts.get(value) || 0) + 1)
+  }
+  for (const value of b) {
+    const existing = counts.get(value)
+    if (!existing) return false
+    if (existing === 1) {
+      counts.delete(value)
+    } else {
+      counts.set(value, existing - 1)
+    }
+  }
+  return counts.size === 0
+}
 
 export function useEvent(doctype, docname) {
   const { getUser } = usersStore()
@@ -235,3 +256,4 @@ export function parseEventDoc(doc) {
       : null,
   }
 }
+
